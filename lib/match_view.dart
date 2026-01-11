@@ -71,24 +71,39 @@ class _MatchViewState extends State<MatchView> {
               ? Center(child: Text("No high confidence matches found"))
               : ListView(
                   children: matches.map((m) {
-                    return Card(
-                      child: ListTile(
-                        title: Text(m["item"]["title"]),
-                        subtitle: Text(m["reason"]),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("${(m["score"] * 100).toInt()}%"),
-                            Text(
-                              "High",
-                              style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
+                    return 
+                    Card(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+
+      // 🔹 IMAGE
+      if (m["item"]["photoUrl"] != null)
+        Image.network(
+          m["item"]["photoUrl"],
+          height: 120,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+
+      // 🔹 TEXT CONTENT
+      ListTile(
+        title: Text(m["item"]["title"]),
+        subtitle: Text(m["reason"]),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("${(m["score"] * 100).toInt()}%"),
+            Text("High",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    ],
+  ),
+);
                   }).toList(),
                 ),
     );

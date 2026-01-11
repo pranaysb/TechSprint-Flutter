@@ -29,7 +29,8 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
-  Future submit() async {
+Future submit() async {
+  try {
     final user = FirebaseAuth.instance.currentUser!;
     String? imageUrl;
 
@@ -50,7 +51,10 @@ class _CreatePostState extends State<CreatePost> {
     });
 
     Navigator.pop(context);
+  } catch (e) {
+    print("POST ERROR: $e");
   }
+}
 
   @override
   Widget build(BuildContext context) {

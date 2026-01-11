@@ -42,6 +42,9 @@ return StreamBuilder<QuerySnapshot>(
         final d = docs[i];
         return Card(
           child: ListTile(
+            leading: d["photoUrl"] != null
+    ? Image.network(d["photoUrl"], width: 60, fit: BoxFit.cover)
+    : Icon(Icons.image_not_supported),
             title: Text(d["title"]),
             subtitle: Text(d["description"]),
             trailing: Text(d["location"]),
