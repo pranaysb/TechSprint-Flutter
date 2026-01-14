@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'cloudinary_service.dart';
 
 class CreatePost extends StatefulWidget {
-  final String defaultType; // lost / found from tab
+  final String defaultType; 
   CreatePost({required this.defaultType});
 
   @override
@@ -17,6 +17,7 @@ class _CreatePostState extends State<CreatePost> {
   File? image;
   late String type;
   bool anonymous = false;
+  bool uploading = false;
 
   final title = TextEditingController();
   final description = TextEditingController();
@@ -25,21 +26,18 @@ class _CreatePostState extends State<CreatePost> {
   @override
   void initState() {
     super.initState();
-    type = widget.defaultType; // 🔹 auto from tab
+    type = widget.defaultType;
   }
 
   Future pickImage() async {
-    final picked =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (picked != null) {
-      setState(() {
-        image = File(picked.path);
-      });
-    }
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) setState(() => image = File(picked.path));
   }
 
   Future submit() async {
+    if (title.text.isEmpty) return;
+    setState(() => uploading = true);
+    
     try {
       final user = FirebaseAuth.instance.currentUser!;
       String? imageUrl;
@@ -64,80 +62,73 @@ class _CreatePostState extends State<CreatePost> {
       Navigator.pop(context);
     } catch (e) {
       print("POST ERROR: $e");
+      setState(() => uploading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Create ${type.toUpperCase()} Post"),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: ListView(
+      appBar: AppBar(title: Text("Create Post")),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 Title
+            Text("What did you ${type}?", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            SizedBox(height: 20),
+            
+            // Image Picker
+            GestureDetector(
+              onTap: pickImage,
+              child: Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade300),
+                  image: image != null ? DecorationImage(image: FileImage(image!), fit: BoxFit.cover) : null,
+                ),
+                child: image == null 
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Icon(Icons.add_a_photo, size: 40, color: Colors.grey), Text("Add Photo", style: TextStyle(color: Colors.grey))]
+                    )
+                  : null,
+              ),
+            ),
+            
+            SizedBox(height: 20),
             TextField(
               controller: title,
-              decoration: InputDecoration(
-                labelText: "Title",
-                prefixIcon: Icon(Icons.title),
-              ),
+              decoration: InputDecoration(labelText: "Title (e.g., Red Wallet)", border: OutlineInputBorder()),
             ),
-
-            // 🔹 Description
+            SizedBox(height: 15),
             TextField(
               controller: description,
-              decoration: InputDecoration(
-                labelText: "Description",
-                prefixIcon: Icon(Icons.description),
-              ),
-              maxLines: 3,
+              decoration: InputDecoration(labelText: "Description", border: OutlineInputBorder(), alignLabelWithHint: true),
+              maxLines: 4,
             ),
-
-            // 🔹 Location
+            SizedBox(height: 15),
             TextField(
               controller: location,
-              decoration: InputDecoration(
-                labelText: "Location",
-                prefixIcon: Icon(Icons.location_on),
-              ),
+              decoration: InputDecoration(labelText: "Location", border: OutlineInputBorder(), prefixIcon: Icon(Icons.pin_drop)),
             ),
-
             SizedBox(height: 10),
-
-            // 🔹 Anonymous Toggle
-            CheckboxListTile(
+            SwitchListTile(
+              title: Text("Post Anonymously"),
               value: anonymous,
-              title: Text("Post anonymously"),
-              onChanged: (v) => setState(() => anonymous = v!),
+              onChanged: (v) => setState(() => anonymous = v),
             ),
-
-            SizedBox(height: 10),
-
-            // 🔹 Image Picker
-            image == null
-                ? TextButton.icon(
-                    icon: Icon(Icons.image),
-                    label: Text("Add Image (Optional)"),
-                    onPressed: pickImage,
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(image!, height: 160, fit: BoxFit.cover),
-                  ),
-
-            SizedBox(height: 25),
-
-            // 🔹 Submit Button
-            ElevatedButton(
-              onPressed: submit,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Text("POST",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: uploading ? null : submit,
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
+                child: uploading ? CircularProgressIndicator(color: Colors.white) : Text("POST NOW"),
               ),
             )
           ],

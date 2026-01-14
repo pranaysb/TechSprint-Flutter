@@ -18,19 +18,56 @@ class AppRoot extends StatefulWidget {
 class _AppRootState extends State<AppRoot> {
   bool dark = false;
 
+  void toggleTheme() {
+    setState(() {
+      dark = !dark;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "FindIt AI",
       debugShowCheckedModeBanner: false,
-      theme: dark ? ThemeData.dark() : ThemeData.light(),
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        colorSchemeSeed: Colors.indigo,
+        scaffoldBackgroundColor: Colors.grey[50],
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          color: Colors.white,
+        ),
+        appBarTheme: AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          titleTextStyle: TextStyle(
+              color: Colors.black87, fontSize: 22, fontWeight: FontWeight.bold),
+          iconTheme: IconThemeData(color: Colors.black87),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.indigo,
+        scaffoldBackgroundColor: Color(0xFF121212),
+        cardTheme: CardTheme(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          color: Color(0xFF1E1E1E),
+        ),
+      ),
+      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (_, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+             return Center(child: CircularProgressIndicator());
+          }
           if (!snap.hasData) return AuthScreen();
-          return HomeScreen(
-            onTheme: () => setState(() => dark = !dark),
-          );
+          return HomeScreen(onTheme: toggleTheme, isDark: dark);
         },
       ),
     );

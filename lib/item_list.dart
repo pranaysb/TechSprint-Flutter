@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'details_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ItemList extends StatelessWidget {
   final String type;
@@ -9,100 +8,113 @@ class ItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final email = FirebaseAuth.instance.currentUser!.email;
-
-    final stream = type == "matches"
-        ? FirebaseFirestore.instance
-            .collection("items")
-            .where("ownerEmail", isEqualTo: email)
-            .where("active", isEqualTo: true)
-            .snapshots()
-        : FirebaseFirestore.instance
-            .collection("items")
-            .where("type", isEqualTo: type)
-            .where("active", isEqualTo: true)
-            .snapshots();
-
     return StreamBuilder(
-      stream: stream,
+      stream: FirebaseFirestore.instance
+          .collection("items")
+          .where("type", isEqualTo: type)
+          .where("active", isEqualTo: true)
+          .orderBy("createdAt", descending: true)
+          .snapshots(),
       builder: (_, snap) {
         if (!snap.hasData) return Center(child: CircularProgressIndicator());
 
         final docs = snap.data!.docs;
-
         if (docs.isEmpty) {
-          return Center(child: Text("No items found"));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.search_off, size: 80, color: Colors.grey[300]),
+                Text("No ${type} items yet", style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          );
         }
 
         return ListView.builder(
+          padding: EdgeInsets.all(16),
           itemCount: docs.length,
           itemBuilder: (_, i) {
             final d = docs[i].data() as Map<String, dynamic>;
             final photo = d["photoUrl"];
 
-            return AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              margin: EdgeInsets.all(12),
-              height: 160,
+            return Hero(
+              tag: docs[i].id,
               child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                margin: EdgeInsets.only(bottom: 20),
+                clipBehavior: Clip.antiAlias,
                 child: InkWell(
-                  onTap: () {},
-                  child: Row(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailsPage(doc: docs[i]))),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // BIG IMAGE AREA
                       Container(
-                        width: 140,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.horizontal(
-                              left: Radius.circular(16)),
-                          color: Colors.grey.shade200,
-                        ),
+                        height: 200,
+                        width: double.infinity,
+                        color: Colors.grey.shade200,
                         child: photo != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(16)),
-                                child: Image.network(photo,
-                                    fit: BoxFit.cover),
-                              )
-                            : Icon(Icons.image, size: 60),
+                            ? Image.network(photo, fit: BoxFit.cover)
+                            : Center(child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey)),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(d["title"] ?? "",
+                                Expanded(
+                                  child: Text(
+                                    d["title"] ?? "No Title",
+                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: type == 'lost' ? Colors.red.withOpacity(0.1) : Colors.teal.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20)
+                                  ),
+                                  child: Text(
+                                    type.toUpperCase(),
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold)),
-                                SizedBox(height: 6),
-                                Text(d["description"] ?? "",
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis),
-                                Spacer(),
-                                Row(children: [
-                                  Icon(Icons.location_on, size: 14),
-                                  SizedBox(width: 4),
-                                  Expanded(
-                                      child: Text(d["location"] ?? "")),
-                                ]),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    child: Text("View Details"),
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => DetailsPage(
-                                                  doc: docs[i])));
-                                    },
+                                      color: type == 'lost' ? Colors.red : Colors.teal,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12
+                                    ),
                                   ),
                                 )
-                              ]),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              d["description"] ?? "",
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: Colors.grey[600], height: 1.5),
+                            ),
+                            SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Icon(Icons.location_on, size: 16, color: Colors.grey),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(d["location"] ?? "Unknown", 
+                                    style: TextStyle(color: Colors.grey[700]),
+                                    maxLines: 1, overflow: TextOverflow.ellipsis
+                                  ),
+                                ),
+                                Text("View Details >", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold))
+                              ],
+                            )
+                          ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

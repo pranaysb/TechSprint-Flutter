@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'item_list.dart';
+import 'matches_tab.dart'; // We will create this next
 import 'create_post.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onTheme;
-  HomeScreen({required this.onTheme});
+  final bool isDark;
+  HomeScreen({required this.onTheme, required this.isDark});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController tab;
 
   @override
@@ -27,63 +28,72 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(children: [
-          CircleAvatar(
-              backgroundImage: user.photoURL != null
-                  ? NetworkImage(user.photoURL!)
-                  : null,
-              child: user.photoURL == null ? Icon(Icons.person) : null),
-          SizedBox(width: 8),
-          Text("FindIt AI"),
-        ]),
-        actions: [
-          Icon(Icons.notifications_outlined),
-          SizedBox(width: 10),
-        ],
-        bottom: TabBar(
-          controller: tab,
-          tabs: const [
-            Tab(text: "Lost"),
-            Tab(text: "Found"),
-            Tab(text: "Matches"),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("FindIt", style: TextStyle(fontWeight: FontWeight.w900, color: Theme.of(context).primaryColor)),
+            Text("AI", style: TextStyle(fontWeight: FontWeight.w300)),
           ],
         ),
+        bottom: TabBar(
+          controller: tab,
+          indicatorColor: Theme.of(context).primaryColor,
+          indicatorWeight: 3,
+          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
+          tabs: const [
+            Tab(text: "Lost Items"),
+            Tab(text: "Found Items"),
+            Tab(text: "AI Matches"),
+          ],
+        ),
+        actions: [
+          IconButton(icon: Icon(Icons.notifications_outlined), onPressed: (){}),
+          SizedBox(width: 8),
+        ],
       ),
       drawer: Drawer(
-        child: ListView(children: [
+        child: Column(children: [
           UserAccountsDrawerHeader(
-            accountName: Text(user.displayName ?? "User"),
+            decoration: BoxDecoration(
+               color: Theme.of(context).primaryColor
+            ),
+            accountName: Text(user.displayName ?? "User", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             accountEmail: Text(user.email ?? ""),
-          ),
-          ListTile(title: Text("My Matches")),
-          ListTile(title: Text("Future Improvements")),
-          ListTile(
-            title: Row(
-              children: [
-                Text("Theme"),
-                Spacer(),
-                Switch(value: false, onChanged: (_) => widget.onTheme()),
-              ],
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+              child: user.photoURL == null ? Text(user.email![0].toUpperCase(), style: TextStyle(fontSize: 24)) : null,
             ),
           ),
+          ListTile(leading: Icon(Icons.history), title: Text("My History")),
           ListTile(
-              title: Text("Logout"),
-              onTap: () => FirebaseAuth.instance.signOut()),
+            leading: Icon(widget.isDark ? Icons.light_mode : Icons.dark_mode),
+            title: Text("Dark Mode"),
+            trailing: Switch(value: widget.isDark, onChanged: (_) => widget.onTheme()),
+          ),
+          Spacer(),
+          ListTile(
+            leading: Icon(Icons.logout, color: Colors.red),
+            title: Text("Logout", style: TextStyle(color: Colors.red)),
+            onTap: () => FirebaseAuth.instance.signOut(),
+          ),
+          SizedBox(height: 20),
         ]),
       ),
       body: TabBarView(controller: tab, children: [
         ItemList(type: "lost"),
         ItemList(type: "found"),
-        ItemList(type: "matches"),
+        MatchesTab(), // The new powerful tab
       ]),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: Icon(Icons.add),
+        label: Text("New Post"),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
         onPressed: () {
           final t = tab.index == 0 ? "lost" : "found";
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => CreatePost(defaultType: t)));
+          Navigator.push(context, MaterialPageRoute(builder: (_) => CreatePost(defaultType: t)));
         },
       ),
     );
