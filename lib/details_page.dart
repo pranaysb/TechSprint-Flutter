@@ -9,114 +9,151 @@ class DetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final d = doc.data() as Map<String, dynamic>;
-    final me = FirebaseAuth.instance.currentUser!.uid == d["ownerUid"];
-    final photo = d["photoUrl"];
+    final data = doc.data() as Map<String, dynamic>;
+    final isMe = FirebaseAuth.instance.currentUser?.uid == data["ownerUid"];
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 350,
             pinned: true,
+            backgroundColor: Colors.indigo,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(d["title"] ?? "Item Details", 
-                style: TextStyle(color: Colors.white, shadows: [Shadow(color: Colors.black45, blurRadius: 10)])
-              ),
-              background: photo != null 
-                ? Image.network(photo, fit: BoxFit.cover)
-                : Container(color: Colors.grey, child: Icon(Icons.image, size: 50, color: Colors.white)),
+              background: data["photoUrl"] != null
+                  ? Image.network(data["photoUrl"], fit: BoxFit.cover)
+                  : Container(
+                      color: Colors.grey[300],
+                      child: Center(child: Icon(Icons.image, size: 80, color: Colors.white)),
+                    ),
             ),
           ),
           SliverList(
             delegate: SliverChildListDelegate([
-              Padding(
-                padding: EdgeInsets.all(20),
+              Container(
+                transform: Matrix4.translationValues(0, -20, 0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                padding: EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Meta tags
-                    Row(
-                      children: [
-                        Chip(
-                          avatar: Icon(Icons.category, size: 16),
-                          label: Text(d["type"].toString().toUpperCase()),
-                          backgroundColor: d["type"] == "lost" ? Colors.red.shade50 : Colors.teal.shade50,
-                        ),
-                        SizedBox(width: 10),
-                        Chip(
-                          avatar: Icon(Icons.calendar_today, size: 16),
-                          label: Text("Active"),
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Text("Description", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Text(d["description"] ?? "No description provided.", style: TextStyle(fontSize: 16, height: 1.5, color: Colors.grey[800])),
-                    
-                    SizedBox(height: 20),
-                    Divider(),
-                    SizedBox(height: 20),
-
-                    Row(children: [
-                      Icon(Icons.location_pin, color: Theme.of(context).primaryColor),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Location", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(d["location"] ?? "Unknown", style: TextStyle(color: Colors.grey[600])),
-                          ],
-                        ),
-                      )
-                    ]),
-
-                    SizedBox(height: 30),
-                    Text("Contact Info", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(child: Text(d["ownerName"][0])),
-                      title: Text(d["ownerName"] ?? "Anonymous"),
-                      subtitle: Text(d["ownerEmail"] ?? ""),
-                    ),
-
-                    SizedBox(height: 20),
-                    
-                    if (!me)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.mail),
-                        label: Text("Contact Owner via Email"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () => launchUrl(Uri.parse("mailto:${d["ownerEmail"]}?subject=Regarding ${d["title"]}")),
+                    Center(
+                      child: Container(
+                        width: 40, height: 4,
+                        decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
                       ),
                     ),
+                    SizedBox(height: 20),
+                    
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: data["type"] == "lost" ? Colors.red[50] : Colors.teal[50],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            data["type"].toString().toUpperCase(),
+                            style: TextStyle(
+                              color: data["type"] == "lost" ? Colors.red : Colors.teal,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Spacer(),
+                        Text("Active", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    
+                    SizedBox(height: 16),
+                    Text(
+                      data["title"] ?? "No Title",
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                    
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 18, color: Colors.indigo),
+                        SizedBox(width: 5),
+                        Text(data["location"] ?? "Unknown", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                      ],
+                    ),
 
-                    if (me)
+                    SizedBox(height: 24),
+                    Text("Description", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text(
+                      data["description"] ?? "",
+                      style: TextStyle(fontSize: 16, height: 1.6, color: Colors.grey[800]),
+                    ),
+
+                    SizedBox(height: 32),
+                    Divider(),
+                    SizedBox(height: 16),
+
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.indigo.shade100,
+                        child: Text(data["ownerName"]?[0] ?? "U", style: TextStyle(color: Colors.indigo)),
+                      ),
+                      title: Text(data["ownerName"] ?? "Anonymous"),
+                      subtitle: Text("Owner"),
+                    ),
+
+                    SizedBox(height: 24),
+
+                    if (!isMe)
                       SizedBox(
                         width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.email),
+                          label: Text("CONTACT OWNER"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.indigo,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          onPressed: () {
+                            final Uri emailLaunchUri = Uri(
+                              scheme: 'mailto',
+                              path: data["ownerEmail"],
+                              query: 'subject=Regarding ${data["title"]}',
+                            );
+                            launchUrl(emailLaunchUri);
+                          },
+                        ),
+                      ),
+                      
+                    if (isMe)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 55,
                         child: OutlinedButton.icon(
-                          icon: Icon(Icons.delete),
-                          label: Text("Mark as Inactive / Delete"),
-                          style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                          icon: Icon(Icons.delete_outline),
+                          label: Text("MARK AS INACTIVE"),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: BorderSide(color: Colors.red.shade200),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                           onPressed: () {
                              doc.reference.update({"active": false});
                              Navigator.pop(context);
                           },
                         ),
                       ),
-                      
+                    
                     SizedBox(height: 50),
                   ],
                 ),
-              )
+              ),
             ]),
           )
         ],

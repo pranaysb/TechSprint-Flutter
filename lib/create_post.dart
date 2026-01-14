@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'cloudinary_service.dart';
 
 class CreatePost extends StatefulWidget {
-  final String defaultType; 
+  final String defaultType;
   CreatePost({required this.defaultType});
 
   @override
@@ -31,11 +31,17 @@ class _CreatePostState extends State<CreatePost> {
 
   Future pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) setState(() => image = File(picked.path));
+    if (picked != null) {
+      setState(() => image = File(picked.path));
+    }
   }
 
   Future submit() async {
-    if (title.text.isEmpty) return;
+    if (title.text.isEmpty || description.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Title and Description are required")));
+      return;
+    }
+
     setState(() => uploading = true);
     
     try {
@@ -61,7 +67,8 @@ class _CreatePostState extends State<CreatePost> {
 
       Navigator.pop(context);
     } catch (e) {
-      print("POST ERROR: $e");
+      print("ERROR: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Upload failed. Try again.")));
       setState(() => uploading = false);
     }
   }
@@ -69,66 +76,93 @@ class _CreatePostState extends State<CreatePost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Create Post")),
+      appBar: AppBar(title: Text("Post ${type.toUpperCase()} Item")),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("What did you ${type}?", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20),
-            
-            // Image Picker
             GestureDetector(
               onTap: pickImage,
               child: Container(
                 height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.grey.shade300),
                   image: image != null ? DecorationImage(image: FileImage(image!), fit: BoxFit.cover) : null,
                 ),
-                child: image == null 
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(Icons.add_a_photo, size: 40, color: Colors.grey), Text("Add Photo", style: TextStyle(color: Colors.grey))]
-                    )
-                  : null,
+                child: image == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_a_photo_outlined, size: 40, color: Colors.grey[600]),
+                          SizedBox(height: 8),
+                          Text("Add Photo", style: TextStyle(color: Colors.grey[600])),
+                        ],
+                      )
+                    : null,
               ),
             ),
             
-            SizedBox(height: 20),
+            SizedBox(height: 24),
+            
             TextField(
               controller: title,
-              decoration: InputDecoration(labelText: "Title (e.g., Red Wallet)", border: OutlineInputBorder()),
+              decoration: InputDecoration(
+                labelText: "Item Name",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Theme.of(context).cardColor,
+              ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 16),
             TextField(
               controller: description,
-              decoration: InputDecoration(labelText: "Description", border: OutlineInputBorder(), alignLabelWithHint: true),
               maxLines: 4,
+              decoration: InputDecoration(
+                labelText: "Description",
+                alignLabelWithHint: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Theme.of(context).cardColor,
+              ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 16),
             TextField(
               controller: location,
-              decoration: InputDecoration(labelText: "Location", border: OutlineInputBorder(), prefixIcon: Icon(Icons.pin_drop)),
+              decoration: InputDecoration(
+                labelText: "Location",
+                prefixIcon: Icon(Icons.pin_drop_outlined),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Theme.of(context).cardColor,
+              ),
             ),
-            SizedBox(height: 10),
+            
+            SizedBox(height: 12),
             SwitchListTile(
+              contentPadding: EdgeInsets.zero,
               title: Text("Post Anonymously"),
               value: anonymous,
               onChanged: (v) => setState(() => anonymous = v),
             ),
-            SizedBox(height: 20),
+
+            SizedBox(height: 24),
+            
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 55,
               child: ElevatedButton(
                 onPressed: uploading ? null : submit,
-                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
-                child: uploading ? CircularProgressIndicator(color: Colors.white) : Text("POST NOW"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: uploading 
+                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                    : Text("PUBLISH POST", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             )
           ],

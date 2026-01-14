@@ -27,47 +27,65 @@ class _AppRootState extends State<AppRoot> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "FindIt AI",
+      title: "TechSprint AI",
       debugShowCheckedModeBanner: false,
+      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+      
+      // --- LIGHT THEME ---
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
         colorSchemeSeed: Colors.indigo,
-        scaffoldBackgroundColor: Colors.grey[50],
-        cardTheme: CardTheme(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          color: Colors.white,
-        ),
+        scaffoldBackgroundColor: Color(0xFFF5F7FA), // Light grey-blue background
         appBarTheme: AppBarTheme(
-          centerTitle: true,
           elevation: 0,
+          scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
+          centerTitle: true,
           titleTextStyle: TextStyle(
-              color: Colors.black87, fontSize: 22, fontWeight: FontWeight.bold),
+            color: Colors.black87, 
+            fontSize: 22, 
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5
+          ),
           iconTheme: IconThemeData(color: Colors.black87),
         ),
+        cardTheme: CardTheme(
+          elevation: 0, // We will control shadows manually for "sexy" look
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          color: Colors.white,
+          surfaceTintColor: Colors.white,
+        ),
       ),
+
+      // --- DARK THEME ---
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         colorSchemeSeed: Colors.indigo,
         scaffoldBackgroundColor: Color(0xFF121212),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+        ),
         cardTheme: CardTheme(
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           color: Color(0xFF1E1E1E),
         ),
       ),
-      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-      home: StreamBuilder(
+
+      home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (_, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-             return Center(child: CircularProgressIndicator());
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+             return Scaffold(body: Center(child: CircularProgressIndicator()));
           }
-          if (!snap.hasData) return AuthScreen();
-          return HomeScreen(onTheme: toggleTheme, isDark: dark);
+          if (snapshot.hasData) {
+            return HomeScreen(onTheme: toggleTheme, isDark: dark);
+          }
+          return AuthScreen();
         },
       ),
     );
