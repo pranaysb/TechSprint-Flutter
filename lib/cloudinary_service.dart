@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
-const CLOUD_NAME = ""; 
-const UPLOAD_PRESET = ""; 
+const CLOUD_NAME = "dmopsxmo3"; 
+const UPLOAD_PRESET = "findit_upload"; 
 
 Future<String?> uploadToCloudinary(File file) async {
   if (CLOUD_NAME.isEmpty) return null;

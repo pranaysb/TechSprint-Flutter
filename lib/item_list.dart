@@ -5,7 +5,7 @@ import 'details_page.dart';
 
 class ItemList extends StatefulWidget {
   final String type;
-  ItemList({required this.type});
+  const ItemList({required this.type, super.key});
 
   @override
   State<ItemList> createState() => _ItemListState();
@@ -29,114 +29,136 @@ class _ItemListState extends State<ItemList> {
 
     return Column(
       children: [
+
+        // 🔹 MY POSTS FILTER (only here)
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Text("My Posts",
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-              Switch(value: onlyMine, onChanged: (v) {
-                setState(() => onlyMine = v);
-              })
+              Text(
+                widget.type == "lost" ? "My Lost" : "My Found",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Switch(
+                value: onlyMine,
+                onChanged: (v) {
+                  setState(() => onlyMine = v);
+                },
+              ),
             ],
           ),
         ),
 
         Expanded(
-          child: StreamBuilder(
+          child: StreamBuilder<QuerySnapshot>(
             stream: query.snapshots(),
             builder: (_, snap) {
-              if (!snap.hasData)
-                return Center(child: CircularProgressIndicator());
+              if (!snap.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
               final docs = snap.data!.docs;
 
-              if (docs.isEmpty)
-                return Center(child: Text("No posts found"));
+              if (docs.isEmpty) {
+                return const Center(child: Text("No posts found"));
+              }
 
               return ListView.builder(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 itemCount: docs.length,
                 itemBuilder: (_, i) {
-                  final d = docs[i].data() as Map<String, dynamic>;
-                  final photo = d["photoUrl"];
+                  final doc = docs[i];
+                  final d = doc.data() as Map<String, dynamic>;
 
                   return GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => DetailsPage(doc: docs[i]),
-                      ),
-                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DetailsPage(doc: doc),
+                        ),
+                      );
+                    },
                     child: Container(
-                      margin: EdgeInsets.only(bottom: 24),
+                      margin: const EdgeInsets.only(bottom: 24),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
-                        color: Theme.of(context).cardColor,
+                        color: Theme.of(context).colorScheme.surface,
                         boxShadow: [
                           BoxShadow(
-                              blurRadius: 30,
-                              offset: Offset(0, 10),
-                              color: Colors.black.withOpacity(0.08))
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.black.withOpacity(0.4)
+                                : Colors.black.withOpacity(0.08)
+                          )
                         ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (photo != null)
+
+                          if (d["photoUrl"] != null)
                             ClipRRect(
-                              borderRadius: BorderRadius.vertical(
+                              borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(24)),
-                              child: Image.network(photo,
-                                  height: 220,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover),
+                              child: Image.network(
+                                d["photoUrl"],
+                                height: 220,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                             ),
 
                           Padding(
-                            padding: EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(20),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(d["title"] ?? "",
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
+                                Text(
+                                  d["title"] ?? "",
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
 
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
 
-                                Text(d["description"] ?? "",
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: Colors.grey)),
+                                Text(
+                                  d["description"] ?? "",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
 
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
 
-                                Row(children: [
-                                  Icon(Icons.location_on,
-                                      size: 16, color: Colors.grey),
-                                  SizedBox(width: 6),
-                                  Text(d["location"] ?? "")
-                                ]),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on, size: 16),
+                                    const SizedBox(width: 6),
+                                    Text(d["location"] ?? ""),
+                                  ],
+                                ),
 
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
 
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 18, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 8),
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(colors: [
-                                        Colors.indigo,
-                                        Colors.purple
-                                      ]),
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(22),
+                                      gradient: const LinearGradient(
+                                        colors: [Colors.indigo, Colors.purple],
+                                      ),
                                     ),
-                                    child: Text("View Details",
-                                        style: TextStyle(
-                                            color: Colors.white)),
+                                    child: const Text(
+                                      "View Details",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 )
                               ],
