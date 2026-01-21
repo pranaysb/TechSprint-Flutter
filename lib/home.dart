@@ -40,52 +40,6 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
 
-      // 🔥 SIDEBAR FIXED
-      drawer: Drawer(
-        child: SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-
-              CircleAvatar(
-                radius: 32,
-                child: Text(user.email![0].toUpperCase()),
-              ),
-
-              const SizedBox(height: 10),
-
-              Text(user.email!,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
-
-              const Divider(height: 40),
-
-              ListTile(
-                leading: const Icon(Icons.brightness_6),
-                title: const Text("Dark / Light Mode"),
-                trailing: Switch(
-                  value: appTheme.value == ThemeMode.dark,
-                  onChanged: (v) {
-                    appTheme.value =
-                        v ? ThemeMode.dark : ThemeMode.light;
-                  },
-                ),
-              ),
-
-              const Spacer(),
-
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text("Logout"),
-                onTap: () {
-                  FirebaseAuth.instance.signOut();
-                },
-              ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
 
       body: TabBarView(
         controller: tab,

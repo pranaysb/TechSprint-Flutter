@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'home.dart'; // Lost & Found module
+import 'home.dart';
 import 'calendar/calendar_home.dart';
+import 'marketplace/marketplace_home.dart';
+import 'main.dart';
 
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
@@ -20,12 +22,9 @@ class _MainHomePageState extends State<MainHomePage>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 800));
-
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-
     _controller.forward();
   }
 
@@ -44,17 +43,50 @@ class _MainHomePageState extends State<MainHomePage>
         title: const Text("FindIt AI"),
         centerTitle: true,
       ),
+
+      drawer: Drawer(
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: const Text("User"),
+              accountEmail: Text(user?.email ?? ""),
+              currentAccountPicture: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.brightness_6),
+              title: const Text("Theme"),
+              trailing: Switch(
+                value: appTheme.value == ThemeMode.dark,
+                onChanged: (v) {
+                  appTheme.value = v ? ThemeMode.dark : ThemeMode.light;
+                },
+              ),
+            ),
+
+            const Divider(),
+
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Logout"),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+              },
+            ),
+          ],
+        ),
+      ),
+
       body: FadeTransition(
         opacity: _fade,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
 
-            // 👋 Greeting
-            Text(
-              "Hello 👋",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text("Hello 👋",
+                style: Theme.of(context).textTheme.titleMedium),
 
             const SizedBox(height: 6),
 
@@ -67,7 +99,7 @@ class _MainHomePageState extends State<MainHomePage>
 
             const SizedBox(height: 30),
 
-            // 🔍 LOST & FOUND MODULE
+            // LOST & FOUND
             _moduleCard(
               context,
               title: "Lost & Found",
@@ -84,7 +116,7 @@ class _MainHomePageState extends State<MainHomePage>
 
             const SizedBox(height: 24),
 
-            // 📅 CALENDAR MODULE
+            // CALENDAR
             _moduleCard(
               context,
               title: "Calendar",
@@ -101,7 +133,23 @@ class _MainHomePageState extends State<MainHomePage>
 
             const SizedBox(height: 24),
 
-            // 🚀 Future placeholder
+            // 🔥 MARKETPLACE RESTORED
+            _moduleCard(
+              context,
+              title: "Marketplace",
+              subtitle: "Buy & Sell inside campus",
+              icon: Icons.storefront,
+              colors: [Colors.green, Colors.teal],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MarketplaceHome()),
+                );
+              },
+            ),
+
+            const SizedBox(height: 24),
+
             _moduleCard(
               context,
               title: "More Modules",
@@ -144,7 +192,6 @@ class _MainHomePageState extends State<MainHomePage>
           child: Row(
             children: [
 
-              // ICON
               Container(
                 height: 60,
                 width: 60,
@@ -157,26 +204,19 @@ class _MainHomePageState extends State<MainHomePage>
 
               const SizedBox(width: 20),
 
-              // TEXT
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  Text(title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      )),
                   const SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                    ),
-                  ),
+                  Text(subtitle,
+                      style: const TextStyle(color: Colors.white70)),
                 ],
               )
             ],
