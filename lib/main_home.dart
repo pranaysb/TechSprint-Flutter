@@ -5,7 +5,7 @@ import 'home.dart';
 import 'calendar/calendar_home.dart';
 import 'marketplace/marketplace_home.dart';
 import 'main.dart';
-
+import 'wellness/wellness_home.dart';
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
 
@@ -158,6 +158,17 @@ class _MainHomePageState extends State<MainHomePage>
  onTap:(){
    Navigator.push(context,
      MaterialPageRoute(builder:(_)=>ComplaintHome()));
+ },
+),
+_moduleCard(
+ context,
+ title: "MindCare AI",
+ subtitle: "Mental wellness assistant",
+ icon: Icons.favorite,
+ colors: [Colors.pink, Colors.red],
+ onTap: () {
+   Navigator.push(context,
+      MaterialPageRoute(builder: (_) => WellnessHome()));
  },
 ),
             _moduleCard(
