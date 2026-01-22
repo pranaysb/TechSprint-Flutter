@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:techsprint_flutter/main_home.dart';
 
 import 'auth.dart';
-import 'home.dart';
 import 'main_home.dart';
 
 final ValueNotifier<ThemeMode> appTheme = ValueNotifier(ThemeMode.system);
@@ -26,32 +24,26 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
 
-          // 🌤 LIGHT THEME
           theme: ThemeData(
-            brightness: Brightness.light,
             useMaterial3: true,
-            colorScheme: ColorScheme.light(
+            brightness: Brightness.light,
+            colorScheme: const ColorScheme.light(
               primary: Colors.indigo,
               secondary: Colors.purple,
-              background: const Color(0xFFF5F7FB),
+              background: Color(0xFFF5F7FB),
               surface: Colors.white,
-              onBackground: Colors.black,
-              onSurface: Colors.black87,
             ),
             scaffoldBackgroundColor: const Color(0xFFF5F7FB),
           ),
 
-          // 🌙 DARK THEME
           darkTheme: ThemeData(
-            brightness: Brightness.dark,
             useMaterial3: true,
-            colorScheme: ColorScheme.dark(
+            brightness: Brightness.dark,
+            colorScheme: const ColorScheme.dark(
               primary: Colors.indigoAccent,
               secondary: Colors.purpleAccent,
-              background: const Color(0xFF0E1117),
-              surface: const Color(0xFF161B22),
-              onBackground: Colors.white,
-              onSurface: Colors.white70,
+              background: Color(0xFF0E1117),
+              surface: Color(0xFF161B22),
             ),
             scaffoldBackgroundColor: const Color(0xFF0E1117),
           ),
@@ -67,7 +59,7 @@ class MyApp extends StatelessWidget {
                 );
               }
               if (snap.hasData) return const MainHomePage();
-              return  AuthScreen();
+              return AuthScreen();
             },
           ),
         );

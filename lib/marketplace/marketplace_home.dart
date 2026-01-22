@@ -9,20 +9,27 @@ class MarketplaceHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Campus Marketplace"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AddProduct()),
-              );
-            },
-          )
-        ],
+appBar: AppBar(
+  title: const Text("Campus Marketplace"),
+  actions: [
+    ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
+      icon: const Icon(Icons.add),
+      label: const Text("Sell"),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddProduct()),
+        );
+      },
+    ),
+    const SizedBox(width: 10),
+  ],
+),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection("marketplace")
