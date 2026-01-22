@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'complaint/complaint_home.dart';
 import 'home.dart';
 import 'calendar/calendar_home.dart';
 import 'marketplace/marketplace_home.dart';
@@ -149,7 +149,17 @@ class _MainHomePageState extends State<MainHomePage>
             ),
 
             const SizedBox(height: 24),
-
+            _moduleCard(
+ context,
+ title:"Smart Complaints",
+ subtitle:"AI auto routed system",
+ icon:Icons.report_problem,
+ colors:[Colors.red,Colors.orange],
+ onTap:(){
+   Navigator.push(context,
+     MaterialPageRoute(builder:(_)=>ComplaintHome()));
+ },
+),
             _moduleCard(
               context,
               title: "More Modules",

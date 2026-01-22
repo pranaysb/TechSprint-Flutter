@@ -5,16 +5,16 @@ const GEMINI_KEY = "YOUR_KEY";
 
 Future<Map<String, String>> analyzeComplaint(String text) async {
   final prompt = """
-Analyze complaint:
+Analyze this complaint and return JSON:
 
-$text
-
-Return JSON:
 {
  "category":"",
  "department":"",
  "priority":"Low/Medium/High"
 }
+
+Complaint:
+$text
 """;
 
   final res = await http.post(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'status_timeline.dart';
 
 class ComplaintStatus extends StatelessWidget {
   @override
@@ -22,10 +23,18 @@ class ComplaintStatus extends StatelessWidget {
           children: docs.map((d){
             return Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: ListTile(
-                title: Text(d["title"]),
-                subtitle: Text(d["department"]),
-                trailing: Text(d["status"]),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children:[
+                    Text(d["title"], style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height:6),
+                    Text(d["department"]),
+                    SizedBox(height:12),
+                    StatusTimeline(d["status"])
+                  ],
+                ),
               ),
             );
           }).toList(),

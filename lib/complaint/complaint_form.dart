@@ -40,7 +40,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
         padding: EdgeInsets.all(20),
         child: Column(children:[
           TextField(controller:title, decoration: InputDecoration(labelText:"Title")),
-          SizedBox(height:10),
+          SizedBox(height:12),
           TextField(controller:desc, maxLines:5, decoration: InputDecoration(labelText:"Description")),
           SizedBox(height:20),
           ElevatedButton(
